@@ -39,9 +39,11 @@ export function useDownloadDocument() {
     downloadDocument: async ({
       organizationId,
       documentId,
+      variant,
     }: {
       organizationId: string;
       documentId: string;
+      variant?: 'ocr';
     }) => {
       try {
         const [document, documentFile] = await Promise.all([
@@ -50,8 +52,15 @@ export function useDownloadDocument() {
             queryFn: async () => fetchDocument({ documentId, organizationId }),
           }),
           queryClient.fetchQuery({
-            queryKey: ['organizations', organizationId, 'documents', documentId, 'file'],
-            queryFn: async () => fetchDocumentFile({ documentId, organizationId }),
+            queryKey: [
+              'organizations',
+              organizationId,
+              'documents',
+              documentId,
+              'file',
+              ...(variant ? [variant] : []),
+            ],
+            queryFn: async () => fetchDocumentFile({ documentId, organizationId, variant }),
           }),
         ]);
 

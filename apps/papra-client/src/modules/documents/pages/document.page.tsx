@@ -43,6 +43,7 @@ import { TextArea } from '@/modules/ui/components/textarea';
 import { TextFieldLabel, TextFieldRoot } from '@/modules/ui/components/textfield';
 import { DocumentContentEditionPanel } from '../components/document-content-edition-panel.component';
 import { DocumentDatePicker } from '../components/document-date-picker.component';
+import { DocumentDownloadDropdown } from '../components/document-download-dropdown.component';
 import { DocumentPreview } from '../components/document-preview.component';
 import { DocumentOpenWithDropdownItems } from '../components/open-with.component';
 import { useRenameDocumentDialog } from '../components/rename-document-button.component';
@@ -51,11 +52,7 @@ import {
   getDocumentActivityIcon,
   getDocumentOpenWithApps,
 } from '../document.models';
-import {
-  useDeleteDocument,
-  useDownloadDocument,
-  useRestoreDocument,
-} from '../documents.composables';
+import { useDeleteDocument, useRestoreDocument } from '../documents.composables';
 import { fetchDocument, fetchDocumentActivities, updateDocument } from '../documents.services';
 
 type KeyValueItem = {
@@ -284,7 +281,6 @@ export const DocumentPage: Component = () => {
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { deleteDocument } = useDeleteDocument();
-  const { downloadDocument } = useDownloadDocument();
   const { restore, getIsRestoring } = useRestoreDocument();
   const navigate = useNavigate();
   const { config } = useConfig();
@@ -389,19 +385,13 @@ export const DocumentPage: Component = () => {
                   <p class="text-sm text-muted-foreground mb-6">{getDocument().id}</p>
 
                   <div class="flex gap-2 mb-2">
-                    <Button
-                      onClick={async () =>
-                        downloadDocument({
-                          organizationId: getDocument().organizationId,
-                          documentId: getDocument().id,
-                        })
-                      }
+                    <DocumentDownloadDropdown
+                      organizationId={getDocument().organizationId}
+                      documentId={getDocument().id}
+                      hasOcr={getDocument().ocrSize != null}
                       variant="outline"
                       size="sm"
-                    >
-                      <div class="i-tabler-download size-4 mr-2" />
-                      {t('documents.actions.download.title')}
-                    </Button>
+                    />
 
                     <DocumentOpenWithDropdown
                       document={getDocument()}

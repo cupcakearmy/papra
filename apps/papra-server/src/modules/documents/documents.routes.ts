@@ -351,10 +351,16 @@ function setupGetDocumentFileRoute({ app, db, documentsStorageService }: RouteDe
         documentId: documentIdSchema,
       }),
     ),
+    validateQuery(
+      v.object({
+        variant: v.optional(v.picklist(['ocr'])),
+      }),
+    ),
     async (context) => {
       const { userId } = getUser({ context });
 
       const { organizationId, documentId } = context.req.valid('param');
+      const { variant } = context.req.valid('query');
 
       const documentsRepository = createDocumentsRepository({ db });
       const organizationsRepository = createOrganizationsRepository({ db });
@@ -366,6 +372,25 @@ function setupGetDocumentFileRoute({ app, db, documentsStorageService }: RouteDe
         documentsRepository,
         organizationId,
       });
+
+      if (variant === 'ocr' && document.ocrStorageKey !== null) {
+        const { fileStream } = await documentsStorageService.getFileStream({
+          storageKey: document.ocrStorageKey,
+          fileEncryptionAlgorithm: document.ocrFileEncryptionAlgorithm,
+          fileEncryptionKekVersion: document.ocrFileEncryptionKekVersion,
+          fileEncryptionKeyWrapped: document.ocrFileEncryptionKeyWrapped,
+        });
+
+        return context.body(Readable.toWeb(fileStream), 200, {
+          // Prevent XSS by serving the file as an octet-stream
+          'Content-Type': 'application/octet-stream',
+          // Always use attachment for defense in depth - client uses blob API anyway
+          'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(document.name)}`,
+          'Content-Length': String(document.ocrSize ?? 0),
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+        });
+      }
 
       const { fileStream } = await documentsStorageService.getFileStream({
         storageKey: document.originalStorageKey,

@@ -65,6 +65,7 @@ export async function createDocument({
   organizationId,
   ocrLanguages = [],
   isContentExtractionEnabled = true,
+  isOcrMyPdfEnabled = false,
   createDocumentStorageKey,
   documentsRepository,
   documentsStorageService,
@@ -86,6 +87,7 @@ export async function createDocument({
   organizationId: string;
   ocrLanguages?: string[];
   isContentExtractionEnabled?: boolean;
+  isOcrMyPdfEnabled?: boolean;
   createDocumentStorageKey: CreateDocumentStorageKey;
   documentsRepository: DocumentsRepository;
   documentsStorageService: StorageService;
@@ -193,6 +195,7 @@ export async function createDocument({
         taskServices,
         ocrLanguages,
         isContentExtractionEnabled,
+        isOcrMyPdfEnabled,
         logger,
       });
 
@@ -250,6 +253,7 @@ export function createDocumentCreationUsecase({
     ocrLanguages: initialDeps.ocrLanguages ?? config.documents.ocrLanguages,
     isContentExtractionEnabled:
       initialDeps.isContentExtractionEnabled ?? config.documents.isContentExtractionEnabled,
+    isOcrMyPdfEnabled: initialDeps.isOcrMyPdfEnabled ?? config.documents.isOcrMyPdfEnabled,
     generateDocumentId: initialDeps.generateDocumentId,
     logger: initialDeps.logger,
   };
@@ -339,6 +343,7 @@ async function createNewDocument({
   taskServices,
   ocrLanguages = [],
   isContentExtractionEnabled = true,
+  isOcrMyPdfEnabled = false,
   logger,
 }: {
   createdAt: Date;
@@ -359,6 +364,7 @@ async function createNewDocument({
   taskServices: TaskServices;
   ocrLanguages?: string[];
   isContentExtractionEnabled?: boolean;
+  isOcrMyPdfEnabled?: boolean;
   logger: Logger;
 }) {
   // TODO: wrap in a transaction
@@ -421,6 +427,13 @@ async function createNewDocument({
     });
   }
 
+  if (isOcrMyPdfEnabled) {
+    await taskServices.scheduleJob({
+      taskName: 'ocr-document',
+      data: { documentId, organizationId },
+    });
+  }
+
   logger.info({ documentId, userId, organizationId, mimeType }, 'Document created');
 
   return { document };
@@ -462,7 +475,7 @@ export async function hardDeleteDocument({
   documentsStorageService,
   eventServices,
 }: {
-  document: Pick<Document, 'id' | 'originalStorageKey' | 'organizationId'>;
+  document: Pick<Document, 'id' | 'originalStorageKey' | 'ocrStorageKey' | 'organizationId'>;
   documentsRepository: DocumentsRepository;
   documentsStorageService: StorageService;
   eventServices: EventServices;
@@ -470,6 +483,9 @@ export async function hardDeleteDocument({
   await Promise.all([
     documentsRepository.hardDeleteDocument({ documentId: document.id }),
     documentsStorageService.deleteFile({ storageKey: document.originalStorageKey }),
+    ...(document.ocrStorageKey
+      ? [documentsStorageService.deleteFile({ storageKey: document.ocrStorageKey })]
+      : []),
   ]);
 
   eventServices.emitEvent({

@@ -1,9 +1,11 @@
 import type { Component } from 'solid-js';
+import type { DocumentVariant } from '../components/document-variant-toggle.component';
 import { A, useParams } from '@solidjs/router';
 import { useQuery } from '@tanstack/solid-query';
-import { createMemo, lazy, onCleanup, Show, Suspense } from 'solid-js';
+import { createMemo, createSignal, lazy, onCleanup, Show, Suspense } from 'solid-js';
 import { useI18n } from '@/modules/i18n/i18n.provider';
 import { Button } from '@/modules/ui/components/button';
+import { DocumentVariantToggle } from '../components/document-variant-toggle.component';
 import { fetchDocument, fetchDocumentFile } from '../documents.services';
 
 const PdfViewer = lazy(async () =>
@@ -17,6 +19,7 @@ const pdfMimeTypes = ['application/pdf'];
 export const DocumentPdfViewerPage: Component = () => {
   const params = useParams();
   const { t } = useI18n();
+  const [getVariant, setVariant] = createSignal<DocumentVariant>('original');
 
   const documentQuery = useQuery(() => ({
     queryKey: ['organizations', params.organizationId, 'documents', params.documentId],
@@ -25,10 +28,23 @@ export const DocumentPdfViewerPage: Component = () => {
   }));
 
   const documentFileQuery = useQuery(() => ({
-    queryKey: ['organizations', params.organizationId, 'documents', params.documentId, 'file'],
+    queryKey: [
+      'organizations',
+      params.organizationId,
+      'documents',
+      params.documentId,
+      'file',
+      ...(getVariant() === 'ocr' ? ['ocr'] : []),
+    ],
     queryFn: async () =>
-      fetchDocumentFile({ documentId: params.documentId, organizationId: params.organizationId }),
+      fetchDocumentFile({
+        documentId: params.documentId,
+        organizationId: params.organizationId,
+        variant: getVariant() === 'ocr' ? 'ocr' : undefined,
+      }),
   }));
+
+  const getHasOcr = () => documentQuery.data?.document.ocrSize != null;
 
   const getIsPdf = () => {
     const document = documentQuery.data?.document;
@@ -76,18 +92,28 @@ export const DocumentPdfViewerPage: Component = () => {
               <span class="text-sm font-medium truncate">{documentQuery.data?.document.name}</span>
             </div>
 
-            <Button
-              as={A}
-              href={`/organizations/${params.organizationId}/documents/${params.documentId}`}
-              variant="ghost"
-              size="icon"
-            >
-              <div class="i-tabler-x size-4" />
-            </Button>
+            <div class="flex items-center gap-2">
+              <DocumentVariantToggle
+                value={getVariant()}
+                onChange={setVariant}
+                hasOcr={getHasOcr()}
+              />
+
+              <Button
+                as={A}
+                href={`/organizations/${params.organizationId}/documents/${params.documentId}`}
+                variant="ghost"
+                size="icon"
+              >
+                <div class="i-tabler-x size-4" />
+              </Button>
+            </div>
           </div>
 
           <div class="flex-1 min-h-0">
-            <Show when={getDataUrl()}>{(url) => <PdfViewer url={url()} />}</Show>
+            <Show when={getDataUrl()} keyed>
+              {(url) => <PdfViewer url={url} />}
+            </Show>
           </div>
         </Show>
       </Suspense>

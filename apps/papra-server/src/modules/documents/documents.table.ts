@@ -31,6 +31,12 @@ export const documentsTable = sqliteTable('documents', {
   fileEncryptionKekVersion: text('file_encryption_kek_version'), // The key encryption key version used to encrypt the file encryption key
   fileEncryptionAlgorithm: text('file_encryption_algorithm'),
 
+  ocrStorageKey: text('ocr_storage_key'),
+  ocrSize: integer('ocr_size'),
+  ocrFileEncryptionKeyWrapped: text('ocr_file_encryption_key_wrapped'),
+  ocrFileEncryptionKekVersion: text('ocr_file_encryption_kek_version'),
+  ocrFileEncryptionAlgorithm: text('ocr_file_encryption_algorithm'),
+
   deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
   deletedBy: text('deleted_by').references(() => usersTable.id, {
     onDelete: 'set null',

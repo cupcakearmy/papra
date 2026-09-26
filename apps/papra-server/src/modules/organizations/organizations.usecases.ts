@@ -735,7 +735,12 @@ export async function purgeExpiredSoftDeletedOrganization({
 
   for await (const document of documentsIterator) {
     try {
-      await documentsStorageService.deleteFile({ storageKey: document.originalStorageKey });
+      await Promise.all([
+        documentsStorageService.deleteFile({ storageKey: document.originalStorageKey }),
+        ...(document.ocrStorageKey !== null
+          ? [documentsStorageService.deleteFile({ storageKey: document.ocrStorageKey })]
+          : []),
+      ]);
       logger.debug(
         { organizationId, documentId: document.id, storageKey: document.originalStorageKey },
         'Deleted document file from storage',

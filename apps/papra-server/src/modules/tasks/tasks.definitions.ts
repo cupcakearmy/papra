@@ -2,6 +2,7 @@ import { registerAutoTagDocumentTask } from '../auto-tagging/tasks/auto-tag-docu
 import type { GlobalDependencies } from '../app/server.types';
 import { registerExtractDocumentFileContentTask } from '../documents/tasks/extract-document-file-content.task';
 import { registerHardDeleteExpiredDocumentsTask } from '../documents/tasks/hard-delete-expired-documents.task';
+import { registerOcrDocumentTask } from '../documents/tasks/ocr-document.task';
 import { registerPurgeExpiredKvEntriesTask } from '../kv-store/tasks/purge-expired-kv-entries.task';
 import { registerExpireInvitationsTask } from '../organizations/tasks/expire-invitations.task';
 import { registerPurgeExpiredOrganizationsTask } from '../organizations/tasks/purge-expired-organizations.task';
@@ -13,6 +14,7 @@ export async function registerTaskDefinitions(deps: GlobalDependencies) {
   await registerExpireInvitationsTask(deps);
   await registerPurgeExpiredOrganizationsTask(deps);
   await registerExtractDocumentFileContentTask(deps);
+  await registerOcrDocumentTask(deps);
   await registerApplyTaggingRuleToDocumentsTask(deps);
   await registerPurgeExpiredKvEntriesTask(deps);
   await registerAutoTagDocumentTask(deps);

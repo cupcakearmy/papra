@@ -5,7 +5,7 @@ import { getExtension } from '../shared/files/file-names';
 import { omit } from '../shared/objects';
 import { generateId } from '../shared/random/ids';
 import { isDefined } from '../shared/utils';
-import { ORIGINAL_DOCUMENTS_STORAGE_KEY } from './documents.constants';
+import { ORIGINAL_DOCUMENTS_STORAGE_KEY, OCR_DOCUMENTS_STORAGE_KEY } from './documents.constants';
 
 export function joinStorageKeyParts(...parts: string[]) {
   return parts.join('/');
@@ -37,6 +37,22 @@ export function generateDocumentId() {
   return generateId({ prefix: 'doc' });
 }
 
+export function buildOcrDocumentKey({
+  documentId,
+  organizationId,
+}: {
+  documentId: string;
+  organizationId: string;
+}) {
+  const ocrStorageKey = joinStorageKeyParts(
+    organizationId,
+    OCR_DOCUMENTS_STORAGE_KEY,
+    `${documentId}.pdf`,
+  );
+
+  return { ocrStorageKey };
+}
+
 export function isDocumentSizeLimitEnabled({ maxUploadSize }: { maxUploadSize: number }) {
   return maxUploadSize > 0;
 }
@@ -51,6 +67,10 @@ export function formatDocumentForApi<T extends PartialBy<DbSelectableDocument, '
     'fileEncryptionKeyWrapped',
     'fileEncryptionKekVersion',
     'originalStorageKey',
+    'ocrStorageKey',
+    'ocrFileEncryptionKeyWrapped',
+    'ocrFileEncryptionKekVersion',
+    'ocrFileEncryptionAlgorithm',
   ]);
 }
 

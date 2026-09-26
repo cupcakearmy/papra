@@ -9,6 +9,7 @@ export type Document = {
   name: string;
   mimeType: string;
   originalSize: number;
+  ocrSize?: number | null;
   createdAt: Date;
   updatedAt?: Date;
   documentDate?: Date;

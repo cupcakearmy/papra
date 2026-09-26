@@ -1,9 +1,11 @@
 import type { Component } from 'solid-js';
 import type { Document } from '../documents.types';
+import type { DocumentVariant } from './document-variant-toggle.component';
 import { useQuery } from '@tanstack/solid-query';
 import {
   createMemo,
   createResource,
+  createSignal,
   lazy,
   Match,
   onCleanup,
@@ -14,6 +16,7 @@ import {
 import { useI18n } from '@/modules/i18n/i18n.provider';
 import { Card } from '@/modules/ui/components/card';
 import { fetchDocumentFile } from '../documents.services';
+import { DocumentVariantToggle } from './document-variant-toggle.component';
 
 const PdfViewer = lazy(async () =>
   import('./pdf-viewer/simple-pdf-viewer.component').then((m) => ({ default: m.SimplePdfViewer })),
@@ -193,6 +196,10 @@ export const DocumentBlobPreview: Component<{ blob: Blob; mimeType: string }> = 
 };
 
 export const DocumentPreview: Component<{ document: Document }> = (props) => {
+  const [getVariant, setVariant] = createSignal<DocumentVariant>('original');
+
+  const getHasOcr = () => props.document.ocrSize != null;
+
   const query = useQuery(() => ({
     queryKey: [
       'organizations',
@@ -200,17 +207,27 @@ export const DocumentPreview: Component<{ document: Document }> = (props) => {
       'documents',
       props.document.id,
       'file',
+      ...(getVariant() === 'ocr' ? ['ocr'] : []),
     ],
     queryFn: async () =>
       fetchDocumentFile({
         documentId: props.document.id,
         organizationId: props.document.organizationId,
+        variant: getVariant() === 'ocr' ? 'ocr' : undefined,
       }),
   }));
 
   return (
-    <Show when={query.data}>
-      {(getBlob) => <DocumentBlobPreview blob={getBlob()} mimeType={props.document.mimeType} />}
-    </Show>
+    <div class="flex flex-col gap-2 h-full">
+      <Show when={getHasOcr()}>
+        <div class="flex justify-end">
+          <DocumentVariantToggle value={getVariant()} onChange={setVariant} hasOcr={getHasOcr()} />
+        </div>
+      </Show>
+
+      <Show when={query.data} keyed>
+        {(blob) => <DocumentBlobPreview blob={blob} mimeType={props.document.mimeType} />}
+      </Show>
+    </div>
   );
 };

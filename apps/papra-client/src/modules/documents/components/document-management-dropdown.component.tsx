@@ -74,18 +74,42 @@ export const DocumentManagementDropdown: Component<{ document: Document }> = (pr
           </DropdownMenuSub>
         </Show>
 
-        <DropdownMenuItem
-          class="cursor-pointer"
-          onClick={async () =>
-            downloadDocument({
-              documentId: props.document.id,
-              organizationId: props.document.organizationId,
-            })
-          }
-        >
-          <div class="i-tabler-download size-4 mr-2" />
-          <span>{t('documents.actions.download.title')}</span>
-        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger class="cursor-pointer">
+            <div class="i-tabler-download size-4 mr-2" />
+            <span>{t('documents.actions.download.title')}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              class="cursor-pointer"
+              onClick={async () =>
+                downloadDocument({
+                  documentId: props.document.id,
+                  organizationId: props.document.organizationId,
+                })
+              }
+            >
+              <div class="i-tabler-download size-4 mr-2" />
+              <span>{t('documents.actions.download.original')}</span>
+            </DropdownMenuItem>
+
+            <Show when={props.document.ocrSize != null}>
+              <DropdownMenuItem
+                class="cursor-pointer"
+                onClick={async () =>
+                  downloadDocument({
+                    documentId: props.document.id,
+                    organizationId: props.document.organizationId,
+                    variant: 'ocr',
+                  })
+                }
+              >
+                <div class="i-tabler-file-text size-4 mr-2" />
+                <span>{t('documents.actions.download.ocr')}</span>
+              </DropdownMenuItem>
+            </Show>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuItem
           class="cursor-pointer"

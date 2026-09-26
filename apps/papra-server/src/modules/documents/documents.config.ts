@@ -36,4 +36,16 @@ export const documentsConfig = {
     default: true,
     env: 'DOCUMENTS_CONTENT_EXTRACTION_ENABLED',
   },
+  isOcrMyPdfEnabled: {
+    doc: 'Whether to enable OCRmyPDF processing of uploaded PDFs (stores a searchable PDF/A copy alongside the original)',
+    schema: booleanishSchema,
+    default: true,
+    env: 'DOCUMENTS_OCR_MY_PDF_ENABLED',
+  },
+  ocrMyPdfBinary: {
+    doc: 'The OCRmyPDF binary to invoke',
+    schema: v.string(),
+    default: 'ocrmypdf',
+    env: 'DOCUMENTS_OCR_MY_PDF_BINARY',
+  },
 } as const satisfies ConfigDefinition;

@@ -36,6 +36,7 @@ export function createDocumentsRepository({ db }: { db: Database }) {
       getAllOrganizationUndeletedDocumentsIterator,
       updateDocument,
       updateDocumentStorageKey,
+      updateDocumentOcrFile,
       getGlobalDocumentsStats,
       areAllDocumentsInOrganization,
     },
@@ -295,6 +296,7 @@ async function getExpiredDeletedDocuments({
     .select({
       id: documentsTable.id,
       originalStorageKey: documentsTable.originalStorageKey,
+      ocrStorageKey: documentsTable.ocrStorageKey,
       organizationId: documentsTable.organizationId,
     })
     .from(documentsTable)
@@ -372,6 +374,7 @@ async function getAllOrganizationTrashDocuments({
     .select({
       id: documentsTable.id,
       originalStorageKey: documentsTable.originalStorageKey,
+      ocrStorageKey: documentsTable.ocrStorageKey,
       organizationId: documentsTable.organizationId,
     })
     .from(documentsTable)
@@ -417,6 +420,7 @@ function getAllOrganizationDocumentsIterator({
     .select({
       id: documentsTable.id,
       originalStorageKey: documentsTable.originalStorageKey,
+      ocrStorageKey: documentsTable.ocrStorageKey,
     })
     .from(documentsTable)
     .where(eq(documentsTable.organizationId, organizationId))
@@ -426,6 +430,7 @@ function getAllOrganizationDocumentsIterator({
   return createIterator({ query, batchSize }) as AsyncGenerator<{
     id: string;
     originalStorageKey: string;
+    ocrStorageKey: string | null;
   }>;
 }
 
@@ -516,6 +521,48 @@ async function updateDocumentStorageKey({
     .returning({ id: documentsTable.id });
 
   return { updated: rows.length > 0 };
+}
+
+async function updateDocumentOcrFile({
+  documentId,
+  organizationId,
+  ocrStorageKey,
+  ocrSize,
+  ocrFileEncryptionKeyWrapped,
+  ocrFileEncryptionKekVersion,
+  ocrFileEncryptionAlgorithm,
+  db,
+}: {
+  documentId: string;
+  organizationId: string;
+  ocrStorageKey: string;
+  ocrSize: number;
+  ocrFileEncryptionKeyWrapped?: string | null;
+  ocrFileEncryptionKekVersion?: string | null;
+  ocrFileEncryptionAlgorithm?: string | null;
+  db: Database;
+}) {
+  const [document] = await db
+    .update(documentsTable)
+    .set(
+      omitUndefined({
+        ocrStorageKey,
+        ocrSize,
+        ocrFileEncryptionKeyWrapped,
+        ocrFileEncryptionKekVersion,
+        ocrFileEncryptionAlgorithm,
+      }),
+    )
+    .where(
+      and(eq(documentsTable.id, documentId), eq(documentsTable.organizationId, organizationId)),
+    )
+    .returning();
+
+  if (isNil(document)) {
+    throw createDocumentNotFoundError();
+  }
+
+  return { document };
 }
 
 async function getGlobalDocumentsStats({ db }: { db: Database }) {

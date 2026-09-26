@@ -74,6 +74,11 @@ describe('sync-document-search event handlers', () => {
         fileEncryptionAlgorithm: null,
         fileEncryptionKekVersion: null,
         fileEncryptionKeyWrapped: null,
+        ocrStorageKey: null,
+        ocrSize: null,
+        ocrFileEncryptionAlgorithm: null,
+        ocrFileEncryptionKekVersion: null,
+        ocrFileEncryptionKeyWrapped: null,
       };
 
       eventServices.emitEvent({
@@ -120,6 +125,11 @@ describe('sync-document-search event handlers', () => {
         fileEncryptionAlgorithm: null,
         fileEncryptionKekVersion: null,
         fileEncryptionKeyWrapped: null,
+        ocrStorageKey: null,
+        ocrSize: null,
+        ocrFileEncryptionAlgorithm: null,
+        ocrFileEncryptionKekVersion: null,
+        ocrFileEncryptionKeyWrapped: null,
       };
 
       const changes = {
@@ -278,6 +288,11 @@ describe('sync-document-search event handlers', () => {
         fileEncryptionAlgorithm: null,
         fileEncryptionKekVersion: null,
         fileEncryptionKeyWrapped: null,
+        ocrStorageKey: null,
+        ocrSize: null,
+        ocrFileEncryptionAlgorithm: null,
+        ocrFileEncryptionKekVersion: null,
+        ocrFileEncryptionKeyWrapped: null,
       };
 
       // Emit multiple events in sequence

@@ -4,6 +4,7 @@ export const DOCUMENT_ID_PREFIX = 'doc';
 export const DOCUMENT_ID_REGEX = createPrefixedIdRegex({ prefix: DOCUMENT_ID_PREFIX });
 
 export const ORIGINAL_DOCUMENTS_STORAGE_KEY = 'originals';
+export const OCR_DOCUMENTS_STORAGE_KEY = 'ocr';
 
 // Hardcoding languages list for now, as the config schema is used in the doc app, the import of @papra/lecture fucks things up at build time due to tesseract
 // but would love to use the actual list from @papra/lecture

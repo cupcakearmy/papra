@@ -145,14 +145,17 @@ export async function fetchDocument({
 export async function fetchDocumentFile({
   documentId,
   organizationId,
+  variant,
 }: {
   documentId: string;
   organizationId: string;
+  variant?: 'ocr';
 }) {
   const blob = await apiClient({
     method: 'GET',
     path: `/api/organizations/${organizationId}/documents/${documentId}/file`,
     responseType: 'blob',
+    ...(variant ? { query: { variant } } : {}),
   });
 
   return blob;
