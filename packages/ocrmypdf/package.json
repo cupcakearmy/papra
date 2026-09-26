@@ -1,0 +1,50 @@
+{
+  "name": "@papra/ocrmypdf",
+  "version": "0.0.1",
+  "description": "A thin TypeScript wrapper around the OCRmyPDF CLI",
+  "keywords": [
+    "ocr",
+    "ocrmypdf",
+    "papra",
+    "pdf",
+    "pdfa"
+  ],
+  "bugs": {
+    "url": "https://github.com/papra-hq/papra/issues"
+  },
+  "license": "MIT",
+  "author": "Corentin Thomasset <corentinth@proton.me> (https://corentin.tech)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/papra-hq/papra",
+    "directory": "packages/ocrmypdf"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "build": "tsdown",
+    "build:watch": "tsdown --watch",
+    "dev": "pnpm build:watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "tinyexec": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
